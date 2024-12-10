@@ -16,34 +16,25 @@ st.set_page_config(layout="wide")
 node_detail = json.load(open('./data/TwiBot-20_cleaned.json', 'r'))
 node_detail_dict = {int(node['ID']): node for node in node_detail}
 
-def get_user_info_by_id(user_id, node_detail_dict):
+
+# 不要索引列
+detail_info_df = pd.read_csv('./data/TwiBot-20_cleaned.csv').reset_index(drop=True)
+# 'ID' 列转为 int
+detail_info_df['ID'] = detail_info_df['ID'].astype(int)
+
+selected_cols = ['ID', 'profile_name',
+       'profile_description', 'profile_location',
+       'profile_followers_count', 'profile_friends_count']
+# rename 映射
+col_name = {
+    'ID': '用户ID',
+    'profile_name': '用户名',
+    'profile_description': '个人简介',
+    'profile_location': '位置',
+    'profile_followers_count': '粉丝数',
+    'profile_friends_count': '关注数'
     
-    # 查找用户信息
-    user = node_detail_dict.get(user_id)
-    if user:
-        profile = user.get("profile", {})
-        tweets = user.get("tweets", [])
-        neighbor = user.get("neighbor", {})
-        info = ''
-        info += f"-  名称: {profile.get('name', '未知')}\n"
-        info += f"-    用户名: {profile.get('screen_name', '未知')}\n"
-        info += f"-    简介: {profile.get('description', '无')}\n"
-        info += f"-    创建时间: {profile.get('created_at', '未知')}\n"
-        info += f"-    位置: {profile.get('location', '未知')}\n"
-        info += f"-    粉丝数: {profile.get('followers_count', '未知')}\n"
-        info += f"-    关注数: {profile.get('friends_count', '未知')}\n"
-        info += f"-    点赞数: {profile.get('fav_count', '未知')}\n"
-        # info += f"推文:\n"
-        # for tweet in tweets:
-        #     info += f"- {tweet}\n"
-        info += f"-    邻居:\n"
-        info += f"-      关注: {neighbor.get('following', [])}\n"
-        info += f"-      粉丝: {neighbor.get('follower', [])}\n"
-        return info
-    else:
-        return "未找到该用户ID的信息"
-
-
+}
 
 community_dict = pickle.load(open('./data/community_dict.pkl', 'rb'))
 # Set header title
@@ -98,13 +89,8 @@ raw_graph = graph_loader.raw_graph
 # 创建 top30 的复选框 + 显示用户所选节点信息的框
 st.write('Top30 用户')
 top_nodes = st.multiselect('Top30 用户', top30)
-st.write('您选择的用户：', top_nodes)
-# 打印用户信息 get_user_info_by_id
-for node in top_nodes:
-    # 粗体
-    st.markdown(f'**用户 {node}**')
-    st.write(get_user_info_by_id(node, node_detail_dict))
-
+st.write('您选择的用户：')
+st.table(detail_info_df[detail_info_df['ID'].isin(top_nodes)][selected_cols].rename(columns=col_name))
 st.write('\n')
 st.write(f'当前图网络检测到{len(community_dict)}个社区')
 
@@ -129,7 +115,6 @@ def visualize_communities(raw_graph, community_dict, highlight_nodes):
         # Highlight nodes 更加大，并且带有 label
 
             
-
         node_size = [100 if node in highlight_nodes else 50 for node in graph_to_display.nodes()]
         
         node_colors = ['red' if node in highlight_nodes else node_color_map[node] for node in graph_to_display.nodes()]
