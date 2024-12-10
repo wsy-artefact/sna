@@ -49,7 +49,7 @@ community_dict = pickle.load(open('./data/community_dict.pkl', 'rb'))
 # Set header title
 st.title('社交网络分析')
 
-graph_loader = GraphLoader('../graph_edges.txt')
+graph_loader = GraphLoader('./data/graph_edges.txt')
 
 
 
