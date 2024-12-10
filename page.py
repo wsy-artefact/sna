@@ -175,13 +175,14 @@ if submit_button:
 st.subheader('选中节点所在子树')
 
 submit_button2 = st.button('可视化', key='submit_button2')
+sg_with_labels = st.checkbox('显示标签', value=False, key='sg_with_labels')
 
 if submit_button2:
 
 
 
     # --- 提取子图 ---
-    sg_with_labels = st.checkbox('显示标签', value=False, key='sg_with_labels')
+
     if top_nodes:
         subgraph_nodes = set()  # 用于存储子图的所有节点
         for node in top_nodes:
