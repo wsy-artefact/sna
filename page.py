@@ -132,7 +132,7 @@ def visualize_communities(raw_graph, community_dict, highlight_nodes):
             font_size=8,
             node_color=node_colors,
             edge_color='gray',
-            arrowsize=0,
+            arrowsize=10,
             alpha=node_alpha
         )
         
