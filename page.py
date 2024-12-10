@@ -18,7 +18,7 @@ node_detail_dict = {int(node['ID']): node for node in node_detail}
 
 
 # 不要索引列
-detail_info_df = pd.read_csv('./data/TwiBot-20_cleaned.csv').reset_index(drop=True)
+detail_info_df = pd.read_csv('./data/info_top30.csv').reset_index(drop=True)
 # 'ID' 列转为 int
 detail_info_df['ID'] = detail_info_df['ID'].astype(int)
 
@@ -67,7 +67,7 @@ with open('top30.txt', 'r') as f:
 # font_size = st.number_input('Font Size', value=8, min_value=1)
 # node_size = st.number_input('Node Size', value=50, min_value=1)
 
-with_labels = st.checkbox('With Labels', value=False)
+
 # arrowsize = st.number_input('Arrow Size', value=10, min_value=1)
 
 colors = [
@@ -86,6 +86,9 @@ colors = [
 
 raw_graph = graph_loader.raw_graph
 
+# 补一个 submit 按钮
+
+
 # 创建 top30 的复选框 + 显示用户所选节点信息的框
 st.write('Top30 用户')
 top_nodes = st.multiselect('Top30 用户', top30)
@@ -93,6 +96,8 @@ st.write('您选择的用户：')
 st.table(detail_info_df[detail_info_df['ID'].isin(top_nodes)][selected_cols].rename(columns=col_name))
 st.write('\n')
 st.write(f'当前图网络检测到{len(community_dict)}个社区')
+
+
 
 def visualize_communities(raw_graph, community_dict, highlight_nodes):
         graph_to_display = raw_graph
@@ -148,7 +153,7 @@ def visualize_communities(raw_graph, community_dict, highlight_nodes):
             plt.scatter([], [], c=[colors[i]], label=f'Community {i}', edgecolors='black')
 
         # 设置标题并显示图例
-        plt.title("Community Detection Visualization", fontsize=16)
+        plt.title("Social Network", fontsize=16)
         # 图例字小一点
         
         # plt.legend(loc='upper right', bbox_to_anchor=(1.1, 1))
@@ -158,45 +163,52 @@ def visualize_communities(raw_graph, community_dict, highlight_nodes):
 
 
 st.subheader('影响力最大化算法')
+with_labels = st.checkbox('显示标签', value=False)
+submit_button = st.button('可视化', key='submit_button')
 
-
-st.pyplot(visualize_communities(raw_graph, community_dict, top_nodes))   
+if submit_button:
+    st.pyplot(visualize_communities(raw_graph, community_dict, top_nodes))   
 
 
 
 # --- 节点子树可视化 ---
-st.subheader('子树可视化')
+st.subheader('选中节点所在子树')
+
+submit_button2 = st.button('可视化', key='submit_button2')
+
+if submit_button2:
 
 
-# --- 提取子图 ---
-sg_with_labels = st.checkbox('显示标签', value=False, key='sg_with_labels')
-if top_nodes:
-    subgraph_nodes = set()  # 用于存储子图的所有节点
-    for node in top_nodes:
-        if node in G:
-            # 提取每个节点的 ego graph（即子图）
-            subgraph = nx.ego_graph(G, node, radius=30000)  
-            subgraph_nodes.update(subgraph.nodes)
 
-    if subgraph_nodes:
-        # 创建包含所有节点的子图
-        subgraph = G.subgraph(subgraph_nodes).copy()
-        st.write(f"提取的子图包含 {len(subgraph.nodes)} 个节点和 {len(subgraph.edges)} 条边。")
+    # --- 提取子图 ---
+    sg_with_labels = st.checkbox('显示标签', value=False, key='sg_with_labels')
+    if top_nodes:
+        subgraph_nodes = set()  # 用于存储子图的所有节点
+        for node in top_nodes:
+            if node in G:
+                # 提取每个节点的 ego graph（即子图）
+                subgraph = nx.ego_graph(G, node, radius=30000)  
+                subgraph_nodes.update(subgraph.nodes)
 
-        # 可视化
-        # 高亮显示输入的节点
-        node_colors = ['red' if node in top_nodes else 'skyblue' for node in subgraph.nodes]
-        fig, ax = plt.subplots(figsize=(8, 6))
-        pos = nx.spring_layout(subgraph)
+        if subgraph_nodes:
+            # 创建包含所有节点的子图
+            subgraph = G.subgraph(subgraph_nodes).copy()
+            st.write(f"提取的子图包含 {len(subgraph.nodes)} 个节点和 {len(subgraph.edges)} 条边。")
 
+            # 可视化
+            # 高亮显示输入的节点
+            node_colors = ['red' if node in top_nodes else 'skyblue' for node in subgraph.nodes]
+            fig, ax = plt.subplots(figsize=(8, 6))
+            pos = nx.spring_layout(subgraph)
 
-        nx.draw(subgraph, pos, with_labels=sg_with_labels, ax=ax, node_color=node_colors, node_size=50,  edge_color='gray', arrowsize=10)
-        st.pyplot(fig)
+            plt.title("Selected Nodes in Social Network ", fontsize=16)
+            nx.draw(subgraph, pos, with_labels=sg_with_labels, ax=ax, node_color=node_colors, node_size=50,  edge_color='gray', arrowsize=10)
+            st.pyplot(fig)
+        else:
+            st.warning("没有找到有效的节点或子图为空。")
+
     else:
-        st.warning("没有找到有效的节点或子图为空。")
-
-else:
-    st.write("请选择至少一个节点")
+        st.write("请选择至少一个节点")
 
 
 # Footer
