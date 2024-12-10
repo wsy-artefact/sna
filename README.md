@@ -1,1 +1,1 @@
-# sna
+streamlit run app.py

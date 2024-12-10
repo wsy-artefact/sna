@@ -1,0 +1,13 @@
+credentials:
+  usernames:
+    test_user:
+      email: test@gmail.com
+      name: "test_user"
+      password: "$2b$12$HqBDy/KJMSvemxFTFSZDxOldBm0yYbxTztMzp4qA9a6PKiQUk36ku" # artefact123456
+cookie:
+  expiry_days: 30
+  key: "1"
+  name: "test_user"
+preauthorized:
+  emails:
+  - test@gmail.com
